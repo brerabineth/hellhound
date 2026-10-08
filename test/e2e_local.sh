@@ -3,16 +3,15 @@
 # Proves: init -> plant -> status -> watch (live detection) -> attack_sim -> check -> status
 set -u
 
-REPO=/home/z/my-project/repos/hellhound
-FAKEHOME=/home/z/my-project/.cache/fakehome
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
+FAKEHOME="$(mktemp -d "${TMPDIR:-/tmp}/hellhound-e2e.XXXXXX")"
 BIN=$REPO/hellhound
 
-export PATH=/home/z/my-project/.cache/go/bin:$PATH
+command -v go >/dev/null 2>&1 || { echo "e2e: go not in PATH"; exit 1; }
 cd "$REPO" || exit 1
 go build -trimpath -ldflags '-s -w' -o hellhound . || exit 1
 
-rm -rf "$FAKEHOME"
-mkdir -p "$FAKEHOME"
+trap 'rm -rf "$FAKEHOME"' EXIT
 export HOME="$FAKEHOME"
 
 fail=0
